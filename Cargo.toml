@@ -10,9 +10,10 @@ readme = "README.md"
 description = "Iterator wrappers for sequence/map serialization"
 
 [features]
-default = ["seq", "map"]
+default = ["seq", "map", "once"]
 seq = []
 map = []
+once = []
 
 [dependencies]
 serde = "1.0.104"

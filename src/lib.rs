@@ -4,5 +4,11 @@
 
 #[cfg(feature = "map")]
 pub mod map;
+
 #[cfg(feature = "seq")]
 pub mod seq;
+
+#[cfg(feature = "once")]
+mod once;
+#[cfg(feature = "once")]
+pub use once::CloneOnce;
