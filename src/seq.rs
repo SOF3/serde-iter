@@ -139,7 +139,7 @@
 //!
 //! Note that this this distinction mainly applies for pre-existing values.
 //! If the clonable value is created during iteration,
-//! e.g. if it is `iter.map(|x| x.to_string()),
+//! e.g. if it is `iter.map(|x| x.to_string())`,
 //! borrowing would not improve anything;
 //! to prevent cloning unnecessarily, it might be desirable to
 //! store the mapped data in a `Vec` beforehand.
