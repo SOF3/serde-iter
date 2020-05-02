@@ -60,7 +60,7 @@ mod tests {
 
     #[test]
     fn test_empty() {
-        let value = to_value(Foo { bar: iter::empty() });
+        let value = to_value(Foo { bar: vec![] });
         let value = value.expect("Failed to serialize");
         assert_eq!(
             value,
@@ -73,7 +73,7 @@ mod tests {
     #[test]
     fn test_once() {
         let value = to_value(Foo {
-            bar: iter::once(("qux", 3)),
+            bar: vec![("qux", 3)],
         });
         let value = value.expect("Failed to serialize");
         assert_eq!(

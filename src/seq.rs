@@ -84,7 +84,7 @@
 //! }
 //!
 //! let v = vec![Costly]; // we just have one Costly item
-//! let foo = Foo { bar: v.into_iter() };
+//! let foo = Foo { bar: v };
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
 //! serde_json::to_string(&foo).unwrap();
 //! assert_eq!(counter.load(Ordering::Relaxed), 1);
@@ -127,7 +127,7 @@
 //! // Previous definitions unchanged
 //!
 //! let v = vec![Costly]; // we just have one Costly item
-//! let foo = Foo { bar: v.iter() };
+//! let foo = Foo { bar: &v };
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
 //! serde_json::to_string(&foo).unwrap();
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
@@ -135,7 +135,7 @@
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
 //! ```
 //!
-//! Since `v.iter()` only iterates `&Costly` but not `Costly`, no clones are performed.
+//! Since `&v` only iterates `&Costly` but not `Costly`, no clones are performed.
 //!
 //! Note that this this distinction mainly applies for pre-existing values.
 //! If the clonable value is created during iteration,
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn test_once() {
-        let value = to_value(Foo { bar: iter::once(2) });
+        let value = to_value(Foo { bar: vec![2] });
         let value = value.expect("Failed to serialize");
         assert_eq!(
             value,
@@ -191,7 +191,7 @@ mod tests {
 
     #[test]
     fn test_empty() {
-        let value = to_value(Foo { bar: iter::empty() });
+        let value = to_value(Foo { bar: vec![] });
         let value = value.expect("Failed to serialize");
         assert_eq!(
             value,
