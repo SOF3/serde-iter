@@ -33,7 +33,7 @@ jobs:
           profile: default
           default: true
       - name: cargo clippy
-        run: "cargo clippy --all ${{matrix.stability}} $([ ${{matrix.toolchain}} == nightly] || echo --features stable)"
+        run: "cargo clippy --all ${{matrix.stability}}"
   test:
     name: unit tests
     runs-on: ubuntu-latest
@@ -54,4 +54,4 @@ jobs:
           profile: default
           default: true
       - name: cargo test
-        run: "cargo test --all ${{matrix.stability}} $([ ${{matrix.toolchain}} == nightly] || echo --features stable)"
+        run: "cargo test --all ${{matrix.stability}}"
