@@ -98,9 +98,6 @@ where
         let borrow = self.0.get_mut();
         let option = borrow.as_mut();
         let iter = option.expect("Attempt to iterate over a CloneOnce");
-        let ret = iter.next();
-        drop(borrow);
-
-        ret
+        iter.next()
     }
 }
