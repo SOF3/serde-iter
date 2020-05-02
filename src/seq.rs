@@ -27,7 +27,7 @@
 //! each time the iterator is serialized, `serde_iter` would clone the iterator and only consume
 //! the clone.
 //! As a result, the Iterator type must implement `Clone`, which is not implemented by all
-//! `Iterator` types.
+//! `IntoIterator` types.
 //!
 //! For example, `std::vec::Drain` does not implement `Clone`, because consuming the iterator
 //! modifies the `Vec`, and doing so multiple times would lead to different semantics:
@@ -78,7 +78,7 @@
 //! }
 //!
 //! #[derive(serde::Serialize)]
-//! struct Foo<T: Iterator<Item = V> + Clone, V: Serialize> {
+//! struct Foo<T: IntoIterator<Item = V> + Clone, V: Serialize> {
 //!     #[serde(with = "serde_iter::seq")]
 //!     bar: T,
 //! }
@@ -119,7 +119,7 @@
 //! # }
 //! #
 //! # #[derive(serde::Serialize)]
-//! # struct Foo<T: Iterator<Item = V> + Clone, V: Serialize> {
+//! # struct Foo<T: IntoIterator<Item = V> + Clone, V: Serialize> {
 //! #     #[serde(with = "serde_iter::seq")]
 //! #     bar: T,
 //! # }
@@ -150,11 +150,12 @@ use serde::ser::{Serialize, SerializeSeq, Serializer};
 pub fn serialize<S, T, V>(iter: &T, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
-    T: Iterator<Item = V> + Clone,
+    T: IntoIterator<Item = V> + Clone,
     V: Serialize,
 {
+    let iter = iter.clone().into_iter();
     let mut seq = serializer.serialize_seq(Some(iter.size_hint().0))?;
-    for value in iter.clone() {
+    for value in iter {
         seq.serialize_element(&value)?;
     }
     seq.end()
@@ -170,7 +171,7 @@ mod tests {
     #[derive(Serialize)]
     struct Foo<T>
     where
-        T: Iterator<Item = i32> + Clone,
+        T: IntoIterator<Item = i32> + Clone,
     {
         #[serde(with = "super")]
         bar: T,

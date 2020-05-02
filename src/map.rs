@@ -30,12 +30,13 @@ use serde::ser::{Serialize, SerializeMap, Serializer};
 pub fn serialize<S, T, K, V>(iter: &T, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
-    T: Iterator<Item = (K, V)> + Clone,
+    T: IntoIterator<Item = (K, V)> + Clone,
     K: Serialize,
     V: Serialize,
 {
+    let iter = iter.clone().into_iter();
     let mut map = serializer.serialize_map(Some(iter.size_hint().0))?;
-    for (key, value) in iter.clone() {
+    for (key, value) in iter {
         map.serialize_entry(&key, &value)?;
     }
     map.end()
@@ -51,7 +52,7 @@ mod tests {
     #[derive(Serialize)]
     struct Foo<T>
     where
-        T: Iterator<Item = (&'static str, usize)> + Clone,
+        T: IntoIterator<Item = (&'static str, usize)> + Clone,
     {
         #[serde(with = "super")]
         bar: T,
