@@ -44,8 +44,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::iter;
-
     use serde::Serialize;
     use serde_json::{json, to_value};
 
