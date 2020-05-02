@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::Cell;
 
 /// A hack utility struct to wrap use-once iterators.
 ///
@@ -56,7 +56,7 @@ use std::cell::RefCell;
 /// }));
 /// serde_json::to_value(&foo).ok();
 /// ```
-pub struct CloneOnce<T, I>(RefCell<Option<I>>)
+pub struct CloneOnce<T, I>(Cell<Option<I>>)
 where
     I: Iterator<Item = T>;
 
@@ -66,7 +66,7 @@ where
     I: Iterator<Item = T>,
 {
     fn from(iter: I) -> Self {
-        Self(RefCell::new(Some(iter)))
+        Self(Cell::new(Some(iter)))
     }
 }
 
@@ -77,14 +77,12 @@ where
 {
     #[inline]
     fn clone(&self) -> Self {
-        let mut borrow = self.0.borrow_mut();
-        let oi = borrow.take();
+        let oi = self.0.take();
         if oi.is_none() {
             panic!("Attempt to clone a CloneOnce twice");
         }
-        drop(borrow);
 
-        Self(RefCell::new(oi))
+        Self(Cell::new(oi))
     }
 }
 
