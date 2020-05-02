@@ -94,6 +94,9 @@ where
     type IntoIter = <I as IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.0.take().expect("Attempt to iterate over an empty CloneOnce").into_iter()
+        self.0
+            .take()
+            .expect("Attempt to iterate over an empty CloneOnce")
+            .into_iter()
     }
 }
