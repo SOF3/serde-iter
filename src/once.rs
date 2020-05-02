@@ -17,7 +17,7 @@ use std::cell::Cell;
 /// #[derive(serde::Serialize)]
 /// struct Foo<I>
 /// where
-///     I: Iterator<Item = u32> + Clone,
+///     I: IntoIterator<Item = u32> + Clone,
 /// {
 ///     #[serde(with = "serde_iter::seq")]
 ///     bar: I,
@@ -39,7 +39,7 @@ use std::cell::Cell;
 /// #[derive(serde::Serialize)]
 /// struct Foo<I>
 /// where
-///     I: Iterator<Item = u32> + Clone,
+///     I: IntoIterator<Item = u32> + Clone,
 /// {
 ///     #[serde(with = "serde_iter::seq")]
 ///     bar: I,
@@ -58,12 +58,12 @@ use std::cell::Cell;
 /// ```
 pub struct CloneOnce<T, I>(Cell<Option<I>>)
 where
-    I: Iterator<Item = T>;
+    I: IntoIterator<Item = T>;
 
 /// Converts a (non-Clone) iterator into a CloneOnce iterator.
 impl<T, I> From<I> for CloneOnce<T, I>
 where
-    I: Iterator<Item = T>,
+    I: IntoIterator<Item = T>,
 {
     fn from(iter: I) -> Self {
         Self(Cell::new(Some(iter)))
@@ -73,7 +73,7 @@ where
 /// Moves the underlying iterator to a cloned value, and leaves a panicking iterator.
 impl<T, I> Clone for CloneOnce<T, I>
 where
-    I: Iterator<Item = T>,
+    I: IntoIterator<Item = T>,
 {
     #[inline]
     fn clone(&self) -> Self {
@@ -86,16 +86,14 @@ where
     }
 }
 
-impl<T, I> Iterator for CloneOnce<T, I>
+impl<T, I> IntoIterator for CloneOnce<T, I>
 where
-    I: Iterator<Item = T>,
+    I: IntoIterator<Item = T>,
 {
     type Item = T;
+    type IntoIter = <I as IntoIterator>::IntoIter;
 
-    fn next(&mut self) -> Option<T> {
-        let borrow = self.0.get_mut();
-        let option = borrow.as_mut();
-        let iter = option.expect("Attempt to iterate over a CloneOnce");
-        iter.next()
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.take().expect("Attempt to iterate over an empty CloneOnce").into_iter()
     }
 }
