@@ -27,7 +27,7 @@
 //! each time the iterator is serialized, `serde_iter` would clone the iterator and only consume
 //! the clone.
 //! As a result, the Iterator type must implement `Clone`, which is not implemented by all
-//! `IntoIterator` types.
+//! `Iterator` types.
 //!
 //! For example, `std::vec::Drain` does not implement `Clone`, because consuming the iterator
 //! modifies the `Vec`, and doing so multiple times would lead to different semantics:
@@ -78,13 +78,13 @@
 //! }
 //!
 //! #[derive(serde::Serialize)]
-//! struct Foo<T: IntoIterator<Item = V> + Clone, V: Serialize> {
+//! struct Foo<T: Iterator<Item = V> + Clone, V: Serialize> {
 //!     #[serde(with = "serde_iter::seq")]
 //!     bar: T,
 //! }
 //!
 //! let v = vec![Costly]; // we just have one Costly item
-//! let foo = Foo { bar: v };
+//! let foo = Foo { bar: v.into_iter() };
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
 //! serde_json::to_string(&foo).unwrap();
 //! assert_eq!(counter.load(Ordering::Relaxed), 1);
@@ -119,7 +119,7 @@
 //! # }
 //! #
 //! # #[derive(serde::Serialize)]
-//! # struct Foo<T: IntoIterator<Item = V> + Clone, V: Serialize> {
+//! # struct Foo<T: Iterator<Item = V> + Clone, V: Serialize> {
 //! #     #[serde(with = "serde_iter::seq")]
 //! #     bar: T,
 //! # }
@@ -127,7 +127,7 @@
 //! // Previous definitions unchanged
 //!
 //! let v = vec![Costly]; // we just have one Costly item
-//! let foo = Foo { bar: &v };
+//! let foo = Foo { bar: v.iter() };
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
 //! serde_json::to_string(&foo).unwrap();
 //! assert_eq!(counter.load(Ordering::Relaxed), 0);
@@ -163,13 +163,15 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::iter;
+
     use serde::Serialize;
     use serde_json::{json, to_value};
 
     #[derive(Serialize)]
     struct Foo<T>
     where
-        T: IntoIterator<Item = i32> + Clone,
+        T: Iterator<Item = i32> + Clone,
     {
         #[serde(with = "super")]
         bar: T,
@@ -177,7 +179,7 @@ mod tests {
 
     #[test]
     fn test_once() {
-        let value = to_value(Foo { bar: vec![2] });
+        let value = to_value(Foo { bar: iter::once(2) });
         let value = value.expect("Failed to serialize");
         assert_eq!(
             value,
@@ -189,7 +191,7 @@ mod tests {
 
     #[test]
     fn test_empty() {
-        let value = to_value(Foo { bar: vec![] });
+        let value = to_value(Foo { bar: iter::empty() });
         let value = value.expect("Failed to serialize");
         assert_eq!(
             value,
