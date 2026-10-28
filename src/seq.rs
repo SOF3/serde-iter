@@ -161,6 +161,24 @@ where
     seq.end()
 }
 
+pub mod option {
+    use serde::ser::{Serialize, Serializer};
+
+    /// Refer to the [module-level documentation](index.html).
+    #[inline]
+    pub fn serialize<S, T, V>(iter: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        T: IntoIterator<Item = V> + Clone,
+        V: Serialize,
+    {
+        match iter {
+            Some(i) => super::serialize(i, serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::iter;
